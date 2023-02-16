@@ -43,17 +43,6 @@ class Title(models.Model):
         help_text='Рейтинг произведения'
     )
     # rating = models.ForeignKey()  Пока не знаю, на что ссылаться.
-    # genre = models.ForeignKey(
-    #     'Genre',
-    #     # blank=False,
-    #     null=True,
-    #     on_delete=models.SET_NULL,
-    #     # default=0,
-    #     # on_delete=models.SET_DEFAULT,
-    #     # on_delete=models.DO_NOTHING,
-    #     verbose_name='Жанр',
-    #     help_text='Жанр, к которому принадлежит произведение'
-    # )
     genre = models.ManyToManyField(
         Genre,
         through='GenreTitle',
