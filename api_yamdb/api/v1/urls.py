@@ -8,6 +8,9 @@ from api.v1.views import (
     UsersMeView,
     UserViewSet,
     YamdbTokenObtainPairView,
+    TitleViewSet,
+    CategoryViewSet,
+    GenreViewSet
 )
 
 router = routers.DefaultRouter()
@@ -25,6 +28,21 @@ router.register(
     r'users',
     UserViewSet,
     basename='user',
+)
+router.register(
+    'titles',
+    TitleViewSet,
+    basename='title'
+)
+router.register(
+    'categories',
+    CategoryViewSet,
+    basename='category'
+)
+router.register(
+    'genres',
+    GenreViewSet,
+    basename='genre'
 )
 
 urlpatterns = [
