@@ -10,14 +10,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
-
+from django_filters.rest_framework import DjangoFilterBackend
 
 from api.v1.permissions import (IsAdminOrReadOnly, IsAdminUser,
                                 IsAuthorOrModerAdminPermission)
 from api.v1.serializers import (CommentSerializer, ReviewSerializer,
                                 SignupSerializer, UserSerializer,
                                 UsersMeSerializer,
-                                YamdbTokenObtainPairSerializer)
+                                YamdbTokenObtainPairSerializer,
+                                TitleSerializer, CategorySerializer,
+                                GenreSerializer)
 from api.v1.utils import send_confirmation_code
 from reviews.models import Category, Comment, Genre, Review, Title
 from user.models import User
@@ -122,3 +124,35 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, review=self.get_review())
+
+
+class CreateListDestroyViewSet(mixins.CreateModelMixin,
+                               mixins.ListModelMixin,
+                               mixins.DestroyModelMixin,
+                               viewsets.GenericViewSet):
+    """Дженерик для операций retrieve/create/list."""
+
+    lookup_field = 'slug'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('category', 'genre', 'name', 'year')
+
+
+class CategoryViewSet(CreateListDestroyViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+
+class GenreViewSet(viewsets.ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
