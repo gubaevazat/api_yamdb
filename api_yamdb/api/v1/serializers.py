@@ -5,6 +5,7 @@ from django.utils import timezone
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.relations import SlugRelatedField
+from rest_framework.validators import UniqueTogetherValidator
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from user.models import User
@@ -85,12 +86,26 @@ class GenreSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
-        slug_field='username'
+        slug_field='username',
+        default=serializers.CurrentUserDefault()
     )
+
+    def validate_score(self, value):
+        if 10 < value < 1:
+            raise serializers.ValidationError('Оценка должна быть от 1 до 10!')
+        return value
 
     class Meta:
         fields = '__all__'
         model = Review
+        validators = [
+            UniqueTogetherValidator(
+            queryset=Review.objects.all(),
+            fields=('author', 'title'),
+            message='Автор может оставить только один отзыв!'
+            )
+        ]
+
 
 
 class CommentSerializer(serializers.ModelSerializer):

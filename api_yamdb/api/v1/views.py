@@ -98,6 +98,7 @@ class SignupView(APIView):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     #pagination_class = PageNumberPagination
+    permission_classes = (IsAuthorOrModerAdminPermission,)
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -107,8 +108,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, title=self.get_title())
-
-
+        title = self.get_title()
+        title.rating = round(title.reviews.aggregate(Avg('score')))
+        title.save()
 
 
 class CommentViewSet(viewsets.ModelViewSet):
