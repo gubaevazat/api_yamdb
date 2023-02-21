@@ -82,6 +82,13 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
         fields = ('name', 'slug')
 
+class CurrentTitle(object):
+
+    requires_context = True
+
+    def __call__(self, serializer_field):
+        return serializer_field.context['view'].kwargs['title_id']
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -89,11 +96,9 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username',
         default=serializers.CurrentUserDefault()
     )
-
-    def validate_score(self, value):
-        if 10 < value < 1:
-            raise serializers.ValidationError('Оценка должна быть от 1 до 10!')
-        return value
+    title = serializers.HiddenField(
+        default=CurrentTitle()
+    )
 
     class Meta:
         fields = '__all__'

@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 from user.models import User
 
 
@@ -101,7 +102,12 @@ class GenreTitle(models.Model):
 
 class Review(models.Model):
     text = models.TextField(verbose_name='Текст')
-    score = models.IntegerField(verbose_name='Оценка')
+    score = models.IntegerField(
+        validators=[
+            MaxValueValidator(10),
+            MinValueValidator(1)
+        ],
+        verbose_name='Оценка')
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -121,6 +127,12 @@ class Review(models.Model):
         default_related_name = 'reviews'
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'],
+                name='check_unique_author_title',
+            )
+        ]
 
     def __str__(self):
         return self.text[:15]

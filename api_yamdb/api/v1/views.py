@@ -97,25 +97,40 @@ class SignupView(APIView):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    #pagination_class = PageNumberPagination
-    permission_classes = (IsAuthorOrModerAdminPermission,)
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrModerAdminPermission)
 
     def get_title(self):
-        return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        return get_object_or_404(Title, id=self.kwargs.get('title_id'))
+
+    def title_rating_avg(self):
+        title = self.get_title()
+        print(title.name)
+        rating = title.reviews.aggregate(Avg('score')).get('score__avg')
+        print(title.reviews.aggregate(Avg('score')))
+        if rating is not None:
+            rating = round(rating)
+        title.rating = rating
+        title.save()
 
     def get_queryset(self):
         return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, title=self.get_title())
-        title = self.get_title()
-        title.rating = round(title.reviews.aggregate(Avg('score')))
-        title.save()
+        self.title_rating_avg()
+
+    def perform_update(self, serializer):
+        serializer.save()
+        self.title_rating_avg()
+
+    def perform_destroy(self, instance):
+        instance.delete()
+        self.title_rating_avg()
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    #pagination_class = PageNumberPagination
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrModerAdminPermission)
 
     def get_review(self):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
