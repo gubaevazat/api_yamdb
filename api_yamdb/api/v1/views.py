@@ -104,9 +104,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def title_rating_avg(self):
         title = self.get_title()
-        print(title.name)
         rating = title.reviews.aggregate(Avg('score')).get('score__avg')
-        print(title.reviews.aggregate(Avg('score')))
         if rating is not None:
             rating = round(rating)
         title.rating = rating
@@ -156,6 +154,7 @@ class CreateListDestroyViewSet(mixins.CreateModelMixin,
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
+    permission_classes = (IsAdminOrReadOnly,)
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category', 'genre', 'name', 'year')
