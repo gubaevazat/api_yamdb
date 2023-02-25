@@ -10,7 +10,9 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         """Проверка на запросы к объекту
         Для безопасных методов всегда True."""
         return (request.method in permissions.SAFE_METHODS
-                or request.user.is_admin)
+                or request.user.is_authenticated
+                and request.user.is_admin
+                )
 
 
 class IsAdminUser(permissions.BasePermission):
