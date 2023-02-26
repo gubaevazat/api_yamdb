@@ -166,14 +166,10 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category', 'genre', 'name', 'year')
 
-    # def get_serializer_class(self):
-    #     if self.request.method in SAFE_METHODS:
-    #         return TitleSerializerGet
-    #     return TitleSerializerPost
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
-            return TitleSerializerPost
-        return TitleSerializerGet
+            return TitleSerializerGet
+        return TitleSerializerPost
 
 
 class CategoryViewSet(CreateListDestroyViewSet):
