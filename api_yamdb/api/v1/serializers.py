@@ -1,7 +1,4 @@
-import re
-
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.relations import SlugRelatedField
@@ -60,15 +57,6 @@ class SignupSerializer(serializers.ModelSerializer):
         model = User
 
 
-class TitleSerializer(serializers.ModelSerializer):
-    category = SlugRelatedField(slug_field='name', read_only=True)
-
-    class Meta:
-        fields = ('id', 'name', 'year', 'rating',
-                  'description', 'genre', 'category')
-        model = Title
-
-
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -81,6 +69,56 @@ class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         fields = ('name', 'slug')
+
+
+class TitleSerializerGet(serializers.ModelSerializer):
+    # category = SlugRelatedField(slug_field='name', read_only=True)
+    genre = GenreSerializer(read_only=True, many=True)
+    category = CategorySerializer(read_only=True)
+
+    class Meta:
+        fields = ('id', 'name', 'year', 'rating',
+                  'description', 'genre', 'category')
+        model = Title
+
+    # def create(self, validated_data):
+    #     if 'category' not in self.initial_data:
+    #         title = Title.objects.create(**validated_data)
+    #         return title
+    #     categories = validated_data.pop('category')
+    #     title = Title.objects.create(**validated_data)
+
+    #     for category in categories:
+    #         current_category, status = Category.objects.get_or_create(**category)
+    #     return title
+
+    # def create(self, validated_data):
+    #     if 'category' not in self.initial_data:
+    #         title = Title.objects.create(**validated_data)
+    #         return title
+    #     category = validated_data.pop('category')
+    #     title = Title.objects.create(**validated_data)
+    #     return title
+
+
+class TitleSerializerPost(serializers.ModelSerializer):
+    category = SlugRelatedField(slug_field='name', read_only=True)
+    # genre = GenreSerializer(read_only=True, many=True)
+    # category = CategorySerializer(read_only=True)
+
+    class Meta:
+        fields = ('id', 'name', 'year', 'rating',
+                  'description', 'genre', 'category')
+        model = Title
+
+    # def create(self, validated_data):
+    #     if 'category' not in self.initial_data:
+    #         title = Title.objects.create(**validated_data)
+    #         return title
+    #     category = validated_data.pop('category')
+    #     title = Title.objects.create(**validated_data)
+    #     return title
+
 
 class CurrentTitle(object):
 
@@ -105,12 +143,11 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         validators = [
             UniqueTogetherValidator(
-            queryset=Review.objects.all(),
-            fields=('author', 'title'),
-            message='Автор может оставить только один отзыв!'
+                queryset=Review.objects.all(),
+                fields=('author', 'title'),
+                message='Автор может оставить только один отзыв!'
             )
         ]
-
 
 
 class CommentSerializer(serializers.ModelSerializer):

@@ -3,9 +3,10 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import get_random_string
 from rest_framework import filters, mixins, status, viewsets
-from rest_framework.permissions import (SAFE_METHODS, AllowAny,
+from rest_framework.permissions import (AllowAny,
                                         IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+                                        IsAuthenticatedOrReadOnly,
+                                        SAFE_METHODS)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
@@ -18,10 +19,10 @@ from api.v1.serializers import (CommentSerializer, ReviewSerializer,
                                 SignupSerializer, UserSerializer,
                                 UsersMeSerializer,
                                 YamdbTokenObtainPairSerializer,
-                                TitleSerializer, CategorySerializer,
-                                GenreSerializer)
+                                TitleSerializerGet, TitleSerializerPost,
+                                CategorySerializer, GenreSerializer)
 from api.v1.utils import send_confirmation_code
-from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.models import Category, Genre, Review, Title
 from user.models import User
 
 
@@ -83,6 +84,7 @@ class YamdbTokenObtainPairView(TokenObtainPairView):
 class SignupView(APIView):
     """Вью для регистрации пользователей."""
     permission_classes = (AllowAny,)
+
     def post(self, request):
         serializer = SignupSerializer(data=request.data)
         if User.objects.filter(username=request.data.get('username'),
@@ -97,7 +99,8 @@ class SignupView(APIView):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrModerAdminPermission)
+    permission_classes = (IsAuthenticatedOrReadOnly,
+                          IsAuthorOrModerAdminPermission)
 
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs.get('title_id'))
@@ -128,11 +131,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrModerAdminPermission)
+    permission_classes = (IsAuthenticatedOrReadOnly,
+                          IsAuthorOrModerAdminPermission)
 
     def get_review(self):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
-        return get_object_or_404(Review, title = title, pk=self.kwargs.get('review_id'))
+        return get_object_or_404(Review, title=title,
+                                 pk=self.kwargs.get('review_id'))
 
     def get_queryset(self):
         return self.get_review().comments.all()
@@ -154,21 +159,28 @@ class CreateListDestroyViewSet(mixins.CreateModelMixin,
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
+    # serializer_class = TitleSerializerGet
     permission_classes = (IsAdminOrReadOnly,)
-    serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category', 'genre', 'name', 'year')
+
+    def get_serializer_class(self):
+        if self.request.method in SAFE_METHODS:
+            return TitleSerializerGet
+        return TitleSerializerPost
 
 
 class CategoryViewSet(CreateListDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(CreateListDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
