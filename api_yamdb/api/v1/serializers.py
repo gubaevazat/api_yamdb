@@ -1,8 +1,11 @@
+from datetime import datetime
+
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_simplejwt.tokens import AccessToken
 
+from api.v1.utils import CurrentTitle
 from reviews.models import Category, Comment, Genre, Review, Title
 from user.models import User
 
@@ -57,6 +60,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """Сериализатор для категорий."""
 
     class Meta:
         fields = ('name', 'slug')
@@ -64,6 +68,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    """Сериализатор для жанров."""
 
     class Meta:
         model = Genre
@@ -71,6 +76,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializerGet(serializers.ModelSerializer):
+    """Сериализатор произведений для операций чтения."""
+
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
 
@@ -81,6 +88,8 @@ class TitleSerializerGet(serializers.ModelSerializer):
 
 
 class TitleSerializerPost(serializers.ModelSerializer):
+    """Сериализатор произведений для операций создания-редактирования."""
+
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
@@ -92,21 +101,22 @@ class TitleSerializerPost(serializers.ModelSerializer):
         required=False,
     )
 
+    def validate_year(self, value):
+        if value > datetime.now().year:
+            raise serializers.ValidationError(
+                'Год выпуска произведения не может быть больше текущего!'
+            )
+        return value
+
     class Meta:
         fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category')
         model = Title
 
 
-class CurrentTitle(object):
-
-    requires_context = True
-
-    def __call__(self, serializer_field):
-        return serializer_field.context['view'].kwargs['title_id']
-
-
 class ReviewSerializer(serializers.ModelSerializer):
+    """Сериализатор для отзывов."""
+
     author = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username',
@@ -129,6 +139,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """Сериализатор для комментариев."""
+
     author = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username'

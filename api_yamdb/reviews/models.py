@@ -3,17 +3,34 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from user.models import User
 
 
-class Genre(models.Model):
+class Category(models.Model):
     name = models.TextField(
         max_length=256,
-        verbose_name='Название',
-        help_text='Название жанра'
+        verbose_name='Название'
     )
     slug = models.SlugField(
         unique=True,
         max_length=50,
-        verbose_name='Slug',
-        help_text='Slug жанра'
+        verbose_name='Slug'
+    )
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+
+    def __str__(self):
+        return self.name
+
+
+class Genre(models.Model):
+    name = models.TextField(
+        max_length=256,
+        verbose_name='Название'
+    )
+    slug = models.SlugField(
+        unique=True,
+        max_length=50,
+        verbose_name='Slug'
     )
 
     class Meta:
@@ -27,61 +44,34 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.TextField(
         max_length=256,
-        verbose_name='Название',
-        help_text='Название произведения'
+        verbose_name='Название'
     )
     year = models.IntegerField(
-        verbose_name='Год выпуска',
-        help_text='Год выпуска произведения'
+        verbose_name='Год выпуска'
     )
     description = models.TextField(
         blank=True, null=True,
-        verbose_name='Описание',
-        help_text='Описание произведения'
+        verbose_name='Описание'
     )
     rating = models.IntegerField(
         blank=True, null=True,
-        verbose_name='Рейтинг',
-        help_text='Рейтинг произведения'
+        verbose_name='Рейтинг'
     )
     genre = models.ManyToManyField(
         Genre,
         through='GenreTitle',
-        verbose_name='Жанр',
-        help_text='Жанр, к которому принадлежит произведение'
+        verbose_name='Жанр'
     )
     category = models.ForeignKey(
-        'Category',
+        Category,
         null=True,
         on_delete=models.SET_NULL,
-        verbose_name='Категория',
-        help_text='Категория, к которой принадлежит произведение'
+        verbose_name='Категория'
     )
 
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
-
-    def __str__(self):
-        return self.name
-
-
-class Category(models.Model):
-    name = models.TextField(
-        max_length=256,
-        verbose_name='Название',
-        help_text='Название категории'
-    )
-    slug = models.SlugField(
-        unique=True,
-        max_length=50,
-        verbose_name='Slug',
-        help_text='Slug категории'
-    )
-
-    class Meta:
-        verbose_name = 'Категория'
-        verbose_name_plural = 'Категории'
 
     def __str__(self):
         return self.name

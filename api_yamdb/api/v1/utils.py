@@ -5,6 +5,15 @@ from django.utils.crypto import get_random_string
 from user.models import User
 
 
+class CurrentTitle(object):
+    """Получение id отзыва из url."""
+
+    requires_context = True
+
+    def __call__(self, serializer_field):
+        return serializer_field.context['view'].kwargs['title_id']
+
+
 def get_confirmation_code():
     """Генерирует confirmation_code."""
     chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%&*'
