@@ -24,6 +24,7 @@ from api.v1.serializers import (CommentSerializer, ReviewSerializer,
 from api.v1.utils import send_confirmation_code
 from reviews.models import Category, Genre, Review, Title
 from user.models import User
+from api.v1.filters import TitleFilter
 
 
 def get_confirmation_code():
@@ -165,6 +166,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category', 'genre', 'name', 'year')
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
