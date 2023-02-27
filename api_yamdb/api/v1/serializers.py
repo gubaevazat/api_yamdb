@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_simplejwt.tokens import AccessToken
 
@@ -71,9 +70,7 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
-
 class TitleSerializerGet(serializers.ModelSerializer):
-    # category = SlugRelatedField(slug_field='name', read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
 
@@ -82,28 +79,8 @@ class TitleSerializerGet(serializers.ModelSerializer):
                   'description', 'genre', 'category')
         model = Title
 
-    # def create(self, validated_data):
-    #     if 'category' not in self.initial_data:
-    #         title = Title.objects.create(**validated_data)
-    #         return title
-    #     categories = validated_data.pop('category')
-    #     title = Title.objects.create(**validated_data)
-
-    #     for category in categories:
-    #         current_category, status = Category.objects.get_or_create(**category)
-    #     return title
-
-    # def create(self, validated_data):
-    #     if 'category' not in self.initial_data:
-    #         title = Title.objects.create(**validated_data)
-    #         return title
-    #     category = validated_data.pop('category')
-    #     title = Title.objects.create(**validated_data)
-    #     return title
-
 
 class TitleSerializerPost(serializers.ModelSerializer):
-    # category = SlugRelatedField(slug_field='name', read_only=True)
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
@@ -119,14 +96,6 @@ class TitleSerializerPost(serializers.ModelSerializer):
         fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category')
         model = Title
-
-    # def create(self, validated_data):
-    #     if 'category' not in self.initial_data:
-    #         title = Title.objects.create(**validated_data)
-    #         return title
-    #     category = validated_data.pop('category')
-    #     title = Title.objects.create(**validated_data)
-    #     return title
 
 
 class CurrentTitle(object):
