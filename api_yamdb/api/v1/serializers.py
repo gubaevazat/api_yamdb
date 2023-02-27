@@ -71,6 +71,7 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
+
 class TitleSerializerGet(serializers.ModelSerializer):
     # category = SlugRelatedField(slug_field='name', read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
@@ -103,7 +104,11 @@ class TitleSerializerGet(serializers.ModelSerializer):
 
 class TitleSerializerPost(serializers.ModelSerializer):
     # category = SlugRelatedField(slug_field='name', read_only=True)
-    genre = GenreSerializer(read_only=True, many=True)
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True,
+    )
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all(),
