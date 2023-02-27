@@ -1,8 +1,6 @@
-import re
-
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -56,17 +54,78 @@ class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('username', 'email')
         model = User
-        
+
+
+class CategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('name', 'slug')
+        model = Category
+
+
+class GenreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Genre
+        fields = ('name', 'slug')
+
+
+class TitleSerializerGet(serializers.ModelSerializer):
+    genre = GenreSerializer(read_only=True, many=True)
+    category = CategorySerializer(read_only=True)
+
+    class Meta:
+        fields = ('id', 'name', 'year', 'rating',
+                  'description', 'genre', 'category')
+        model = Title
+
+
+class TitleSerializerPost(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True,
+    )
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all(),
+        required=False,
+    )
+
+    class Meta:
+        fields = ('id', 'name', 'year', 'rating',
+                  'description', 'genre', 'category')
+        model = Title
+
+
+class CurrentTitle(object):
+
+    requires_context = True
+
+    def __call__(self, serializer_field):
+        return serializer_field.context['view'].kwargs['title_id']
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
-        slug_field='username'
+        slug_field='username',
+        default=serializers.CurrentUserDefault()
+    )
+    title = serializers.HiddenField(
+        default=CurrentTitle()
     )
 
     class Meta:
         fields = '__all__'
         model = Review
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Review.objects.all(),
+                fields=('author', 'title'),
+                message='Автор может оставить только один отзыв!'
+            )
+        ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
