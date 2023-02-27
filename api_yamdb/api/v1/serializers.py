@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import AccessToken
@@ -74,7 +75,7 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleSerializerGet(serializers.ModelSerializer):
     # category = SlugRelatedField(slug_field='name', read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
-    category = CategorySerializer(read_only=True)
+    category = CategorySerializer(read_only=True, many=False)
 
     class Meta:
         fields = ('id', 'name', 'year', 'rating',
@@ -102,9 +103,19 @@ class TitleSerializerGet(serializers.ModelSerializer):
 
 
 class TitleSerializerPost(serializers.ModelSerializer):
-    category = SlugRelatedField(slug_field='name', read_only=True)
-    # genre = GenreSerializer(read_only=True, many=True)
-    # category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(read_only=True, many=True)
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all(),
+        required=False,
+    )
+
+    def validate_year(self, value):
+        if value > datetime.now().year:
+            raise serializers.ValidationError(
+                'Год выпуска произведения не может быть больше текущего!'
+            )
+        return value
 
     class Meta:
         fields = ('id', 'name', 'year', 'rating',

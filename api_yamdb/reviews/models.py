@@ -17,8 +17,31 @@ class Genre(models.Model):
     )
 
     class Meta:
+        default_related_name = 'genres'
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
+
+    def __str__(self):
+        return self.name
+
+
+class Category(models.Model):
+    name = models.TextField(
+        max_length=256,
+        verbose_name='Название',
+        help_text='Название категории'
+    )
+    slug = models.SlugField(
+        unique=True,
+        max_length=50,
+        verbose_name='Slug',
+        help_text='Slug категории'
+    )
+
+    class Meta:
+        default_related_name = 'categories'
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
     def __str__(self):
         return self.name
@@ -51,7 +74,7 @@ class Title(models.Model):
         help_text='Жанр, к которому принадлежит произведение'
     )
     category = models.ForeignKey(
-        'Category',
+        Category,
         null=True,
         on_delete=models.SET_NULL,
         verbose_name='Категория',
@@ -59,29 +82,9 @@ class Title(models.Model):
     )
 
     class Meta:
+        default_related_name = 'titles'
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
-
-    def __str__(self):
-        return self.name
-
-
-class Category(models.Model):
-    name = models.TextField(
-        max_length=256,
-        verbose_name='Название',
-        help_text='Название категории'
-    )
-    slug = models.SlugField(
-        unique=True,
-        max_length=50,
-        verbose_name='Slug',
-        help_text='Slug категории'
-    )
-
-    class Meta:
-        verbose_name = 'Категория'
-        verbose_name_plural = 'Категории'
 
     def __str__(self):
         return self.name
