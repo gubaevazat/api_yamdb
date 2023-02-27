@@ -2,29 +2,28 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import get_random_string
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
-from rest_framework.permissions import (AllowAny,
+from rest_framework.permissions import (SAFE_METHODS, AllowAny,
                                         IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly,
-                                        SAFE_METHODS)
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
-from django_filters.rest_framework import DjangoFilterBackend
 
+from api.v1.filters import TitleFilter
 from api.v1.permissions import (IsAdminOrReadOnly, IsAdminUser,
                                 IsAuthorOrModerAdminPermission)
-from api.v1.serializers import (CommentSerializer, ReviewSerializer,
-                                SignupSerializer, UserSerializer,
+from api.v1.serializers import (CategorySerializer, CommentSerializer,
+                                GenreSerializer, ReviewSerializer,
+                                SignupSerializer, TitleSerializerGet,
+                                TitleSerializerPost, UserSerializer,
                                 UsersMeSerializer,
-                                YamdbTokenObtainPairSerializer,
-                                TitleSerializerGet, TitleSerializerPost,
-                                CategorySerializer, GenreSerializer)
+                                YamdbTokenObtainPairSerializer)
 from api.v1.utils import send_confirmation_code
 from reviews.models import Category, Genre, Review, Title
 from user.models import User
-from api.v1.filters import TitleFilter
 
 
 def get_confirmation_code():
