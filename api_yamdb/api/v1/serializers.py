@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -80,6 +81,13 @@ class TitleSerializerGet(serializers.ModelSerializer):
 
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
+    rating = serializers.SerializerMethodField()
+
+    def get_rating(self, title):
+        rating = title.reviews.aggregate(Avg('score')).get('score__avg')
+        if rating is not None:
+            rating = round(rating)
+        return rating
 
     class Meta:
         fields = ('id', 'name', 'year', 'rating',
@@ -109,8 +117,7 @@ class TitleSerializerPost(serializers.ModelSerializer):
         return value
 
     class Meta:
-        fields = ('id', 'name', 'year', 'rating',
-                  'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
         model = Title
 
 

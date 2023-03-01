@@ -1,4 +1,3 @@
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
@@ -83,30 +82,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs.get('title_id'))
 
-    def title_rating_avg(self):
-        title = self.get_title()
-        print(title.name)
-        rating = title.reviews.aggregate(Avg('score')).get('score__avg')
-        print(title.reviews.aggregate(Avg('score')))
-        if rating is not None:
-            rating = round(rating)
-        title.rating = rating
-        title.save()
-
     def get_queryset(self):
         return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, title=self.get_title())
-        self.title_rating_avg()
-
-    def perform_update(self, serializer):
-        serializer.save()
-        self.title_rating_avg()
-
-    def perform_destroy(self, instance):
-        instance.delete()
-        self.title_rating_avg()
 
 
 class CommentViewSet(viewsets.ModelViewSet):
