@@ -1,5 +1,6 @@
 import csv
 import codecs
+
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
@@ -60,47 +61,48 @@ class Command(BaseCommand):
                 )
                 genre_title.save()
 
-        # with codecs.open(f'{settings.BASE_DIR}/static/data/users.csv',
-        #                  "r", "utf_8_sig") as csv_file:
-        #     csv_reader = csv.DictReader(csv_file, delimiter=',')
-        #     for row in csv_reader:
-        #         user = User(
-        #             id=row['id'],
-        #             username=row['username'],
-        #             email=row['email'],
-        #             role=row['role'],
-        #             bio=row['bio'],
-        #             first_name=row['first_name'],
-        #             last_name=row['last_name']
-        #         )
-        #         user.save()
+        with codecs.open(f'{settings.BASE_DIR}/static/data/users.csv',
+                         "r", "utf_8_sig") as csv_file:
+            csv_reader = csv.DictReader(csv_file, delimiter=',')
+            for row in csv_reader:
+                user = User(
+                    id=row['id'],
+                    username=row['username'],
+                    email=row['email'],
+                    role=row['role'],
+                    bio=row['bio'],
+                    first_name=row['first_name'],
+                    last_name=row['last_name']
+                )
+                user.save()
 
-        # with codecs.open(f'{settings.BASE_DIR}/static/data/review.csv',
-        #                  "r", "utf_8_sig") as csv_file:
-        #     csv_reader = csv.DictReader(csv_file, delimiter=',')
-        #     for row in csv_reader:
-        #         title = Title.objects.get(pk=row['title_id'])
-        #         review = Review(
-        #             id=row['id'],
-        #             title=title,
-        #             text=row['text'],
-        #             author=row['author'],
-        #             score=row['score'],
-        #             pub_date=row['pub_date']
-        #         )
-        #         review.save()
+        with codecs.open(f'{settings.BASE_DIR}/static/data/review.csv',
+                         "r", "utf_8_sig") as csv_file:
+            csv_reader = csv.DictReader(csv_file, delimiter=',')
+            for row in csv_reader:
+                title = Title.objects.get(pk=row['title_id'])
+                author = User.objects.get(pk=row['author'])
+                review = Review(
+                    id=row['id'],
+                    title=title,
+                    text=row['text'],
+                    author=author,
+                    score=row['score'],
+                    pub_date=row['pub_date']
+                )
+                review.save()
 
-        # with codecs.open(f'{settings.BASE_DIR}/static/data/comments.csv',
-        #                  "r", "utf_8_sig") as csv_file:
-        #     csv_reader = csv.DictReader(csv_file, delimiter=',')
-        #     for row in csv_reader:
-        #         review = Title.objects.get(pk=row['review_id'])
-        #         author = User.objects.get(pk=row['author'])
-        #         comments = Comment(
-        #             id=row['id'],
-        #             review=review,
-        #             text=row['text'],
-        #             author=author,
-        #             pub_date=row['pub_date']
-        #         )
-        #         comments.save()
+        with codecs.open(f'{settings.BASE_DIR}/static/data/comments.csv',
+                         "r", "utf_8_sig") as csv_file:
+            csv_reader = csv.DictReader(csv_file, delimiter=',')
+            for row in csv_reader:
+                review = Review.objects.get(pk=row['review_id'])
+                author = User.objects.get(pk=row['author'])
+                comments = Comment(
+                    id=row['id'],
+                    review=review,
+                    text=row['text'],
+                    author=author,
+                    pub_date=row['pub_date']
+                )
+                comments.save()
