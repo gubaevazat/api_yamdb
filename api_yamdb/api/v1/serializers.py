@@ -84,10 +84,8 @@ class TitleSerializerGet(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
 
     def get_rating(self, title):
-        rating = title.reviews.aggregate(Avg('score')).get('score__avg')
-        if rating is not None:
-            rating = round(rating)
-        return rating
+        """Вычисление рейтинга произведения."""
+        return None or title.reviews.aggregate(Avg('score')).get('score__avg')
 
     class Meta:
         fields = ('id', 'name', 'year', 'rating',
