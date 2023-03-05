@@ -53,10 +53,6 @@ class Title(models.Model):
         blank=True, null=True,
         verbose_name='Описание'
     )
-    rating = models.IntegerField(
-        blank=True, null=True,
-        verbose_name='Рейтинг'
-    )
     genre = models.ManyToManyField(
         Genre,
         through='GenreTitle',
