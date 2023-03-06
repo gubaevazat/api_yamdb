@@ -48,12 +48,12 @@ class YamdbTokenObtainPairSerializer(serializers.Serializer):
 class SignupSerializer(serializers.ModelSerializer):
     """Сериализатор для регистрации пользователей."""
 
-    def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                'me нельзя использовать в качестве имени',
-            )
-        return value
+    # def validate_username(self, value):
+    #     if value == 'me':
+    #         raise serializers.ValidationError(
+    #             'me нельзя использовать в качестве имени',
+    #         )
+    #     return value
 
     class Meta:
         fields = ('username', 'email')
