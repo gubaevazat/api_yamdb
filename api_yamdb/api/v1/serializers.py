@@ -15,6 +15,11 @@ from user.validators import validate_username
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор модели User."""
 
+    username = serializers.CharField(
+        max_length=150,
+        validators=(validate_username,)
+    )
+
     class Meta:
         fields = (
             'username',
