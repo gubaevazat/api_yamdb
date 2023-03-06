@@ -4,13 +4,13 @@ from django.core.exceptions import ValidationError
 
 
 def validate_username(username):
-    reg = re.compile(r'^[\w.@+-]+')
-    if not reg.match(username):
-        ValidationError(
-            'В username недопустимые символы'
+    if not bool(re.match(r'^[\w.@+-]+$', username)):
+        raise ValidationError(
+            'Некорректные символы в username'
         )
 
-    if username == 'me':
+    if username.lower() == 'me':
         raise ValidationError(
             'Имя пользователя не может быть me'
         )
+    return username
