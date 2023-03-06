@@ -39,13 +39,13 @@ class User(AbstractUser):
     confirmation_code = models.CharField(
         max_length=20,
         blank=True,
-        verbose_name='Код подтверждения',
-        validators=(validate_username,)
+        verbose_name='Код подтверждения'
     )
     username = models.CharField(
         max_length=150,
         unique=True,
-        verbose_name='username пользователя'
+        verbose_name='username пользователя',
+        validators=(validate_username,)
     )
 
     class Meta:

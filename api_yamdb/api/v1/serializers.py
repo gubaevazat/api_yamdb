@@ -3,13 +3,13 @@ from datetime import datetime
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 from rest_framework_simplejwt.tokens import AccessToken
 
 from api.v1.utils import CurrentTitle
 from reviews.models import Category, Comment, Genre, Review, Title
 from user.models import User
-#from user.validators import validate_username
+from user.validators import validate_username
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -49,12 +49,13 @@ class YamdbTokenObtainPairSerializer(serializers.Serializer):
 class SignupSerializer(serializers.ModelSerializer):
     """Сериализатор для регистрации пользователей."""
 
-    # def validate_username(self, value):
-    #     if value == 'me':
-    #         raise serializers.ValidationError(
-    #             'me нельзя использовать в качестве имени',
-    #         )
-    #     return value
+    username = serializers.CharField(
+        max_length=150,
+        validators=(
+            validate_username,
+            UniqueValidator(queryset=User.objects.all())
+        )
+    )
 
     class Meta:
         fields = ('username', 'email')
