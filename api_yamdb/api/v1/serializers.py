@@ -9,6 +9,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from api.v1.utils import CurrentTitle
 from reviews.models import Category, Comment, Genre, Review, Title
 from user.models import User
+#from user.validators import validate_username
 
 
 class UserSerializer(serializers.ModelSerializer):
