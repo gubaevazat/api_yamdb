@@ -4,6 +4,8 @@ from django.utils.crypto import get_random_string
 
 from user.models import User
 
+from api_yamdb.settings import ADMIN_EMAIL
+
 
 class CurrentTitle(object):
     """Получение id отзыва из url."""
@@ -31,6 +33,6 @@ def send_confirmation_code(request):
     send_mail(
         'данные для получеия токена',
         f'Код подтверждения {user.confirmation_code}',
-        'token@yamdb.ru',
+        ADMIN_EMAIL,
         [request.data.get('email')],
     )

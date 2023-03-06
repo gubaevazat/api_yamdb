@@ -44,3 +44,16 @@
 нужно перейти по адресу:
 
     http://127.0.0.1:8000/redoc/
+
+Для тестирования проекта в директории `/api_yamdb/static/data`, подготовлены несколько файлов в формате `csv` с контентом для ресурсов **Users**, **Titles**, **Categories**, **Genres**, **Reviews** и **Comments**.
+Для загрузки необходимо выполнить команду:
+
+    python manage.py csv_import
+Если возникают ошибки при загрузке нужно выполнить следующую последовательность команд:
+
+  Удалить все папки с миграциями, удалить файл базы данных `db.sqllite3`. В терминале выполнить команды в следующем порядке:
+
+    python manage.py makemigrations user
+    python manage.py migrate user
+    python manage.py makemigrations reviews
+    python manage.py migrate reviews

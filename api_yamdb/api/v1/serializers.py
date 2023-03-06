@@ -1,13 +1,14 @@
-from datetime import datetime
-
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 from rest_framework_simplejwt.tokens import AccessToken
 
 from api.v1.utils import CurrentTitle
 from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.validators import validate_year
 from user.models import User
+from user.validators import validate_username
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -47,12 +48,13 @@ class YamdbTokenObtainPairSerializer(serializers.Serializer):
 class SignupSerializer(serializers.ModelSerializer):
     """Сериализатор для регистрации пользователей."""
 
-    def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                'me нельзя использовать в качестве имени',
-            )
-        return value
+    username = serializers.CharField(
+        max_length=150,
+        validators=(
+            validate_username,
+            UniqueValidator(queryset=User.objects.all())
+        )
+    )
 
     class Meta:
         fields = ('username', 'email')
@@ -80,6 +82,11 @@ class TitleSerializerGet(serializers.ModelSerializer):
 
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
+    rating = serializers.SerializerMethodField()
+
+    def get_rating(self, title):
+        """Вычисление рейтинга произведения."""
+        return None or title.reviews.aggregate(Avg('score')).get('score__avg')
 
     class Meta:
         fields = ('id', 'name', 'year', 'rating',
@@ -100,17 +107,12 @@ class TitleSerializerPost(serializers.ModelSerializer):
         queryset=Category.objects.all(),
         required=False,
     )
-
-    def validate_year(self, value):
-        if value > datetime.now().year:
-            raise serializers.ValidationError(
-                'Год выпуска произведения не может быть больше текущего!'
-            )
-        return value
+    year = serializers.IntegerField(
+        validators=(validate_year,)
+    )
 
     class Meta:
-        fields = ('id', 'name', 'year', 'rating',
-                  'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
         model = Title
 
 

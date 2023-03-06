@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 
+from user.validators import validate_username
+
 
 class UserRole(models.TextChoices):
     ADMIN = 'admin'
@@ -24,7 +26,7 @@ class User(AbstractUser):
         blank=True,
     )
     role = models.CharField(
-        max_length=9,
+        max_length=20,
         choices=UserRole.choices,
         default=UserRole.USER,
         verbose_name='Роль',
@@ -37,7 +39,13 @@ class User(AbstractUser):
     confirmation_code = models.CharField(
         max_length=20,
         blank=True,
-        verbose_name='Код подтверждения',
+        verbose_name='Код подтверждения'
+    )
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        verbose_name='username пользователя',
+        validators=(validate_username,)
     )
 
     class Meta:
