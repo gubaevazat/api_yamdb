@@ -2,6 +2,7 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import get_random_string
 
+from api_yamdb.settings import ADMIN_EMAIL
 from user.models import User
 
 
@@ -31,6 +32,6 @@ def send_confirmation_code(request):
     send_mail(
         'данные для получеия токена',
         f'Код подтверждения {user.confirmation_code}',
-        'token@yamdb.ru',
+        ADMIN_EMAIL,
         [request.data.get('email')],
     )

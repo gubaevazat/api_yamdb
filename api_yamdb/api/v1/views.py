@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import (SAFE_METHODS, AllowAny,
                                         IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
@@ -34,26 +35,22 @@ class UserViewSet(ModelViewSet):
     search_fields = ('username',)
     permission_classes = (IsAuthenticated, IsAdminUser)
 
-
-class UsersMeView(APIView):
-    """Вью для эндпоинта users/me/."""
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request):
-        me = get_object_or_404(User, username=request.user.username)
-        serializer = UserSerializer(me)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def patch(self, request):
-        me = get_object_or_404(User, username=request.user.username)
-        serializer = UsersMeSerializer(me, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    @action(detail=False, methods=['get', 'patch'], url_path='me', permission_classes = (IsAuthenticated,))
+    def me(self, request):
+        if request.method == "GET":
+            me = get_object_or_404(User, username=request.user.username)
+            serializer = UserSerializer(me)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        if request.method == "PATCH":
+            me = get_object_or_404(User, username=request.user.username)
+            serializer = UsersMeSerializer(me, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class YamdbTokenObtainPairView(TokenObtainPairView):
-    """Вью для получения токена"""
+    """Вью для получения токена."""
     serializer_class = YamdbTokenObtainPairSerializer
 
 

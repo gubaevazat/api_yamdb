@@ -5,7 +5,6 @@ from api.v1.views import (
     ReviewViewSet,
     CommentViewSet,
     SignupView,
-    UsersMeView,
     UserViewSet,
     YamdbTokenObtainPairView,
     TitleViewSet,
@@ -45,10 +44,13 @@ router.register(
     basename='genre'
 )
 
-urlpatterns = [
-    path('auth/token/', YamdbTokenObtainPairView.as_view(),
+auth_patterns = [
+    path('token/', YamdbTokenObtainPairView.as_view(),
          name='create_token'),
-    path('auth/signup/', SignupView.as_view(), name='signup'),
-    path('users/me/', UsersMeView.as_view(), name='me'),
+    path('signup/', SignupView.as_view(), name='signup'),
+]
+
+urlpatterns = [
+    path('auth/', include(auth_patterns)),
     path('', include(router.urls)),
 ]
