@@ -1,11 +1,10 @@
-import csv
 import codecs
+import csv
 
-from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.core.management.base import BaseCommand
 
-from reviews.models import (Title, Genre, Category, GenreTitle,
-                            Review, Comment)
+from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
 from user.models import User
 
 

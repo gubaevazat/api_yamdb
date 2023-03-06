@@ -35,18 +35,18 @@ class UserViewSet(ModelViewSet):
     search_fields = ('username',)
     permission_classes = (IsAuthenticated, IsAdminUser)
 
-    @action(detail=False, methods=['get', 'patch'], url_path='me', permission_classes = (IsAuthenticated,))
-    def me(self, request):
+    @action(detail=False, methods=['get', 'patch'], url_path='me',
+            permission_classes=(IsAuthenticated,))
+    def get_change_account(self, request):
+        """Функция для запроса к эндпоинту users/me."""
+        me = get_object_or_404(User, username=request.user.username)
         if request.method == "GET":
-            me = get_object_or_404(User, username=request.user.username)
             serializer = UserSerializer(me)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        if request.method == "PATCH":
-            me = get_object_or_404(User, username=request.user.username)
+        else:
             serializer = UsersMeSerializer(me, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class YamdbTokenObtainPairView(TokenObtainPairView):

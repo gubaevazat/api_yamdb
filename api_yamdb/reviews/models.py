@@ -1,5 +1,7 @@
-from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
+
+from reviews.validators import validate_year
 from user.models import User
 
 
@@ -47,6 +49,7 @@ class Title(models.Model):
         verbose_name='Название'
     )
     year = models.IntegerField(
+        validators=(validate_year,),
         verbose_name='Год выпуска'
     )
     description = models.TextField(

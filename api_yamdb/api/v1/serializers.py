@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -8,6 +6,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from api.v1.utils import CurrentTitle
 from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.validators import validate_year
 from user.models import User
 from user.validators import validate_username
 
@@ -108,13 +107,9 @@ class TitleSerializerPost(serializers.ModelSerializer):
         queryset=Category.objects.all(),
         required=False,
     )
-
-    def validate_year(self, value):
-        if value > datetime.now().year:
-            raise serializers.ValidationError(
-                'Год выпуска произведения не может быть больше текущего!'
-            )
-        return value
+    year = serializers.IntegerField(
+        validators=(validate_year,)
+    )
 
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
