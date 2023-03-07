@@ -1,4 +1,5 @@
-from django.db.models import Avg
+import decimal
+
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
@@ -82,11 +83,13 @@ class TitleSerializerGet(serializers.ModelSerializer):
 
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
-    rating = serializers.SerializerMethodField()
-
-    def get_rating(self, title):
-        """Вычисление рейтинга произведения."""
-        return None or title.reviews.aggregate(Avg('score')).get('score__avg')
+    rating = serializers.DecimalField(
+        read_only=True,
+        max_digits=3,
+        decimal_places=1,
+        coerce_to_string=False,
+        rounding=decimal.ROUND_HALF_DOWN,
+    )
 
     class Meta:
         fields = ('id', 'name', 'year', 'rating',
